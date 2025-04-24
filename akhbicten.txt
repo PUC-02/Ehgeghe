@@ -1,45 +1,82 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/daucobonhi/Ui-Redz-V2/refs/heads/main/UiREDzV2.lua"))()
+-- UltraSpeed Script by PucMods
+-- Không cần thư viện - Tự động phát hiện nhân vật
+-- Tốc độ từ 0 đến 9999+
 
-local Window = MakeWindow({
-    Hub = {
-        Title = "SPEED HACK",
-        Color = Color3.fromRGB(255, 0, 0)
-    }
-})
+local Player = game:GetService("Players").LocalPlayer
+local CurrentSpeed = 16
+local SpeedEnabled = false
 
-local currentSpeed = 16
-local enabled = false
-local humanoid
+-- Tạo giao diện đơn giản
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = game.CoreGui
 
-local function updateSpeed()
-    if game.Players.LocalPlayer.Character then
-        humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 200, 0, 120)
+Frame.Position = UDim2.new(0.8, 0, 0.3, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.Parent = ScreenGui
+
+local Title = Instance.new("TextLabel")
+Title.Text = "⚡ UltraSpeed"
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.TextColor3 = Color3.fromRGB(255, 50, 50)
+Title.Font = Enum.Font.GothamBold
+Title.Parent = Frame
+
+local SpeedSlider = Instance.new("Slider")
+SpeedSlider.Size = UDim2.new(0.9, 0, 0, 30)
+SpeedSlider.Position = UDim2.new(0.05, 0, 0.3, 0)
+SpeedSlider.MinValue = 0
+SpeedSlider.MaxValue = 9999
+SpeedSlider.Value = 16
+SpeedSlider.Parent = Frame
+
+local SpeedValue = Instance.new("TextLabel")
+SpeedValue.Text = "Speed: 16"
+SpeedValue.Size = UDim2.new(1, 0, 0, 20)
+SpeedValue.Position = UDim2.new(0, 0, 0.5, 0)
+SpeedValue.Parent = Frame
+
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Size = UDim2.new(0.9, 0, 0, 30)
+ToggleButton.Position = UDim2.new(0.05, 0, 0.7, 0)
+ToggleButton.Text = "BẬT TỐC ĐỘ"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+ToggleButton.Parent = Frame
+
+-- Xử lý tốc độ
+local function UpdateSpeed()
+    local character = Player.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
         if humanoid then
-            humanoid.WalkSpeed = enabled and currentSpeed or 16
+            humanoid.WalkSpeed = SpeedEnabled and CurrentSpeed or 16
         end
     end
 end
 
-AddSlider(MakeTab({Name = "Speed"}), {
-    Name = "Tốc độ (0-9999)",
-    Min = 0,
-    Max = 9999,
-    Default = 16,
-    Callback = function(value)
-        currentSpeed = value
-        if enabled then updateSpeed() end
-    end
-})
-
-AddToggle(MakeTab({Name = "Speed"}), {
-    Name = "Bật Speed Hack",
-    Default = false,
-    Callback = function(state)
-        enabled = state
-        updateSpeed()
-    end
-})
-
-game.Players.LocalPlayer.CharacterAdded:Connect(function()
-    if enabled then updateSpeed() end
+-- Kết nối sự kiện
+SpeedSlider.Changed:Connect(function()
+    CurrentSpeed = SpeedSlider.Value
+    SpeedValue.Text = "Speed: "..math.floor(CurrentSpeed)
+    if SpeedEnabled then UpdateSpeed() end
 end)
+
+ToggleButton.MouseButton1Click:Connect(function()
+    SpeedEnabled = not SpeedEnabled
+    ToggleButton.Text = SpeedEnabled and "TẮT TỐC ĐỘ" or "BẬT TỐC ĐỘ"
+    ToggleButton.BackgroundColor3 = SpeedEnabled and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
+    UpdateSpeed()
+end)
+
+-- Tự động cập nhật khi respawn
+Player.CharacterAdded:Connect(function()
+    if SpeedEnabled then 
+        wait(1) -- Đợi nhân vật load xong
+        UpdateSpeed() 
+    end
+end)
+
+-- Áp dụng ngay khi vào game
+UpdateSpeed()
